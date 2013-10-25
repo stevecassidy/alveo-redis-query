@@ -12,9 +12,13 @@ r = redis.StrictRedis(host='localhost', port=6379, db=0)
 for key in r.keys('*'):
     r.delete(key)
 
-file_list = ['sample1.txt', 'sample2.txt', 'sample3.txt', 'sample4.txt',
-             'sample5.txt', 'sample6.txt', 'sample7.txt', 'sample8.txt',
-             'sample9.txt', 'sample10.txt']
+def get_files(directory):
+    """gets all the files in the specified directory"""
+    #http://www.daniweb.com/software-development/python/threads/177972/how-to-list-the-subdirrectories-in-a-folder
+    files = os.listdir(directory)
+    for i in range(len(files)):
+        files[i] = directory + '\\' + files[i]
+    return files
 
 def tokenise(text):
     tokenizer = RegexpTokenizer(r"\w+\'?\w+|\w+")
@@ -23,7 +27,6 @@ def tokenise(text):
 def create_index(file_list):
     
     for filename in file_list:
-        filename = '\.\.\\samples\\ace test\\' + filename
         with open(filename, 'r') as f:
             text = f.read()
             text = text.lower()
@@ -56,6 +59,8 @@ def add_to_index(filename, text, token_set):
 
 if __name__ == '__main__':
 
+    file_list = get_files('.\\samples\\ace test\\')
+    
     start = time.clock()
     
     create_index(file_list)
