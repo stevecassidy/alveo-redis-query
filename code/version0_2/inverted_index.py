@@ -22,7 +22,7 @@ def get_files(directory):
     return files
 
 def tokenize(text):
-    return HCSvLabTokenizer(r"\w+\'?\w+|\w+").tokenize(text)
+    return HCSvLabTokenizer(r"\d(\d*\.\d+)*\w*|\w+([\'\-]?\w+)?").tokenize(text)
 
 def create_index(file_list):
 

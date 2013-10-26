@@ -21,12 +21,13 @@ def get_files(directory):
     return files
 
 def tokenize(text):
-    return HCSvLabTokenizer(r"\w+\'?\w+|\w+").tokenize(text)
+    #r"\w(\d+(\.\d+)*)*(\w*([\'\-]?\w+)?)*"
+    #r"\d+(\.\d+)*|\w+([\'\-]?\w+)?"
+    return HCSvLabTokenizer(r"\d(\d*\.\d+)*\w*|\w+([\'\-]?\w+)?").tokenize(text)
 
 def create_index(file_list):
 
     for filename in file_list:
-##        filename = '.\\samples\\ace test\\' + filename
         with open(filename, 'r') as f:
             text = f.read()
             text = text.lower()
@@ -50,7 +51,7 @@ if __name__ == '__main__':
 
     clear_all_keys()
     
-    file_list = get_files('.\\samples\\ace test\\')
+    file_list = get_files('.\\samples\\ace')
 
     start = time.clock()
     
@@ -63,5 +64,5 @@ if __name__ == '__main__':
 ##        for key in r.keys('*'):
 ##            #as we are storing a list in redis, r.get(key) cannot be used
 ##            #instead, use r.lrange(key, 0, -1), where the arguments are the indices
-##            f.write(key + " " + str(r.lrange(key, 0, -1)) + "\n")
+##            f.write(key + "\n")# + " " + str(r.lrange(key, 0, -1)) + "\n")
     

@@ -21,7 +21,7 @@ def get_files(directory):
     return files
 
 def tokenise(text):
-    tokenizer = RegexpTokenizer(r"\w+\'?\w+|\w+")
+    tokenizer = RegexpTokenizer(r"\d(\d*\.\d+)*\w*|\w+([\'\-]?\w+)?")
     return tokenizer.tokenize(text)
     
 def create_index(file_list):
