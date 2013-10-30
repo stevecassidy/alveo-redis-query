@@ -5,6 +5,7 @@ from hcsvlab_tokenizer import HCSvLabTokenizer
 ##import cPickle as pickle
 import pickle
 import os
+import client
 
 r = redis.StrictRedis(host='localhost', port=6379, db=0)
 
@@ -25,23 +26,31 @@ def tokenize(text):
     #r"\d+(\.\d+)*|\w+([\'\-]?\w+)?"
     return HCSvLabTokenizer(r"\d(\d*\.\d+)*\w*|\w+([\'\-]?\w+)?").tokenize(text)
 
-def create_index(file_list):
+def update_index(file_list=[], use_external=False):
 
-    for filename in file_list:
-        with open(filename, 'r') as f:
-            text = f.read()
-            text = text.lower()
+    if use_external:
+
+        #gets the items from the item list "ace"
+        items = client.get_item_list(client.get_item_lists()[0]['item_list_url'])
+        for item in items['items']:
+            text = client.get_item_primary_text(item).lower()
+            add_to_index(text, item)
             
-            tokens = tokenize(text)
             
-            add_to_index(filename, tokens)
+    else:
+        for filename in file_list:
+            with open(filename, 'r') as f:
+                text = f.read().lower()
+##                text = text.lower()
+                add_to_index(text, filename)
 
+def add_to_index(text, filename):
 
-def add_to_index(filename, d):
-
-    for key in d.keys():
+    tokens = tokenize(text)
+    
+    for key in tokens.keys():
         index_value = IndexValue(key, filename)
-        index_value.add_char_offset_value(d[key])
+        index_value.add_char_offset_value(tokens[key])
 
         result = filename + ',' + pickle.dumps(index_value)
         r.rpush(key, result)    
@@ -51,14 +60,15 @@ if __name__ == '__main__':
 
     clear_all_keys()
     
-    file_list = get_files('.\\samples\\ace')
+    file_list = get_files('.\\samples\\ace test')
 
-    start = time.clock()
+    start = time.time()
     
-    create_index(file_list)
+##    update_index(file_list)
+    update_index(use_external=True)
 
     #http://stackoverflow.com/questions/85451/python-time-clock-vs-time-time-accuracy
-    print (time.clock() - start)
+    print (time.time() - start)
 
 ##    with open('output.txt', 'w') as f:
 ##        for key in r.keys('*'):

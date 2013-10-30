@@ -24,7 +24,7 @@ def tokenise(text):
     tokenizer = RegexpTokenizer(r"\d(\d*\.\d+)*\w*|\w+([\'\-]?\w+)?")
     return tokenizer.tokenize(text)
     
-def create_index(file_list):
+def update_index(file_list):
     
     for filename in file_list:
         with open(filename, 'r') as f:
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     
     start = time.clock()
     
-    create_index(file_list)
+    update_index(file_list)
 
     #http://stackoverflow.com/questions/85451/python-time-clock-vs-time-time-accuracy
     print (time.clock() - start)
