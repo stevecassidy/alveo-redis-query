@@ -10,8 +10,8 @@ import client
 r = redis.StrictRedis(host='localhost', port=6379, db=0)
 
 def clear_all_keys():
-    for key in r.keys('*'):
-        r.delete(key)
+    #https://redis-py.readthedocs.org/en/latest/#redis.StrictRedis.flushall
+    r.flushall()
 
 def get_files(directory):
     """gets all the files in the specified directory"""
@@ -22,8 +22,6 @@ def get_files(directory):
     return files
 
 def tokenize(text):
-    #r"\w(\d+(\.\d+)*)*(\w*([\'\-]?\w+)?)*"
-    #r"\d+(\.\d+)*|\w+([\'\-]?\w+)?"
     return HCSvLabTokenizer(r"\d(\d*\.\d+)*\w*|\w+([\'\-]?\w+)?").tokenize(text)
 
 def update_index(file_list=[], use_external=False):
@@ -60,12 +58,12 @@ if __name__ == '__main__':
 
     clear_all_keys()
     
-    file_list = get_files('.\\samples\\ace test')
+    file_list = get_files('.\\samples\\ace')
 
     start = time.time()
     
-##    update_index(file_list)
-    update_index(use_external=True)
+    update_index(file_list)
+##    update_index(use_external=True)
 
     #http://stackoverflow.com/questions/85451/python-time-clock-vs-time-time-accuracy
     print (time.time() - start)
