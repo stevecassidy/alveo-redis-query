@@ -55,14 +55,14 @@ if __name__ == '__main__':
 
     clear_all_keys()
     
-    file_list = get_files('.\\samples\\ace test\\')
+    file_list = get_files('.\\samples\\ace\\')
 
-    start = time.clock()
+    start = time.time()
     
     update_index(file_list)
 
     #http://stackoverflow.com/questions/85451/python-time-clock-vs-time-time-accuracy
-    print (time.clock() - start)
+    print (time.time() - start)
 
 ##    with open('output.txt', 'w') as f:
 ##        for key in r.keys('*'):

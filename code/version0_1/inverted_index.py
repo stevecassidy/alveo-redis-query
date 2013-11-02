@@ -4,6 +4,7 @@ import time
 import redis
 from index_value import IndexValue
 import pickle
+import os
 
 ##dic = {}
 r = redis.StrictRedis(host='localhost', port=6379, db=0)
@@ -59,18 +60,18 @@ def add_to_index(filename, text, token_set):
 
 if __name__ == '__main__':
 
-    file_list = get_files('.\\samples\\ace test\\')
+    file_list = get_files('.\\samples\\ace\\')
     
-    start = time.clock()
+    start = time.time()
     
     update_index(file_list)
 
     #http://stackoverflow.com/questions/85451/python-time-clock-vs-time-time-accuracy
-    print (time.clock() - start)
+    print (time.time() - start)
 
-    with open('output.txt', 'w') as f:
-        for key in r.keys('*'):
-            #as we are storing a list in redis, r.get(key) cannot be used
-            #instead, use r.lrange(key, 0, -1), where the arguments are the indices
-            f.write(key + " " + str(r.lrange(key, 0, -1)) + "\n")
+##    with open('output.txt', 'w') as f:
+##        for key in r.keys('*'):
+##            #as we are storing a list in redis, r.get(key) cannot be used
+##            #instead, use r.lrange(key, 0, -1), where the arguments are the indices
+##            f.write(key + " " + str(r.lrange(key, 0, -1)) + "\n")
     
