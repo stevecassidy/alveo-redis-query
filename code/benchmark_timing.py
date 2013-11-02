@@ -3,6 +3,7 @@ import inverted_index as current_indexer
 import version0_1.inverted_index as ver0_1_indexer
 import version0_2.inverted_index as ver0_2_indexer
 import version0_3.inverted_index as ver0_3_indexer
+import version0_4.inverted_index as ver0_4_indexer
 import os
 
 ITERATIONS = 20
@@ -94,7 +95,10 @@ if __name__ == '__main__':
     print "version 0.3"
 ##    print calculate_average_time_for_indexer_internal(ver0_3_indexer, file_list)
 
+    print "version 0.4"
+    print calculate_average_time_for_indexer_internal(ver0_4_indexer, file_list)
+
     print "current version"
-    print calculate_average_time_for_indexer_internal(current_indexer, file_list)
+##    print calculate_average_time_for_indexer_internal(current_indexer, file_list)
 ##    print calculate_average_time_for_indexer_external(current_indexer)
     
