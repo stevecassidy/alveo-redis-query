@@ -5,6 +5,8 @@ import version0_2.inverted_index as ver0_2_indexer
 import version0_3.inverted_index as ver0_3_indexer
 import version0_4.inverted_index as ver0_4_indexer
 import os
+import redis
+import query_processor
 
 ITERATIONS = 20
 
@@ -16,14 +18,14 @@ def get_files(directory):
         files[i] = directory + '\\' + files[i]
     return files
 
-def calculate_average_time_for_indexer_internal(indexer, file_list):
+def calculate_average_time_for_indexer_internal(indexer, filelist):
     average = 0
     for i in range(ITERATIONS):
         print (i+1),
         
         start = time.time()
 
-        indexer.update_index(file_list)
+        indexer.update_index(filelist)
 
         end = (time.time() - start)
 
@@ -78,27 +80,68 @@ def calculate_average_time_for_indexer_external(indexer):
 #single
 
 #boolean
+def calculate_average_time_for_and_query(q, filelist, terms):
+
+    average = 0
+    for i in range(ITERATIONS):
+        print (i+1),
+        
+        start = time.time()
+
+        q.and_query(terms)
+
+        end = (time.time() - start)
+
+        print end
+        
+        average += end
+
+        if (i+1) % 10 == 0:
+            print (average / (i+1)), average
+    
+    average /= ITERATIONS
+    return average
+
 
 #proximity
   
 if __name__ == '__main__':
     current_indexer.clear_all_keys()
     
-    file_list = get_files('.\\samples\\ace\\')
+    filelist = get_files('.\\samples\\ace\\')
 
     print "version 0.1"
-##    print calculate_average_time_for_indexer_internal(ver0_1_indexer, file_list)
+##    print calculate_average_time_for_indexer_internal(ver0_1_indexer, filelist)
 
     print "version 0.2"
-##    print calculate_average_time_for_indexer_internal(ver0_2_indexer, file_list)
+##    print calculate_average_time_for_indexer_internal(ver0_2_indexer, filelist)
 
     print "version 0.3"
-##    print calculate_average_time_for_indexer_internal(ver0_3_indexer, file_list)
+##    print calculate_average_time_for_indexer_internal(ver0_3_indexer, filelist)
 
     print "version 0.4"
-    print calculate_average_time_for_indexer_internal(ver0_4_indexer, file_list)
+##    print calculate_average_time_for_indexer_internal(ver0_4_indexer, filelist)
 
     print "current version"
-##    print calculate_average_time_for_indexer_internal(current_indexer, file_list)
+##    print calculate_average_time_for_indexer_internal(current_indexer, filelist)
 ##    print calculate_average_time_for_indexer_external(current_indexer)
-    
+
+    current_indexer.update_index(filelist)
+
+    #common words - 828 documents
+    terms = ['a', 'the']
+    print "AND query with common words:", terms
+    common = calculate_average_time_for_and_query(query_processor, filelist, terms)
+    print common
+
+    #rare words (in ace corpus) - 1 document
+    terms = ['las', 'vegas']
+    print "AND query with rare words (ace corpus):", terms
+    rare = calculate_average_time_for_and_query(query_processor, filelist, terms)
+    print rare
+
+    print "AND query median"
+    print (common+rare)/2
+
+    #clear all of the keys after the benchmarking is done
+    current_indexer.clear_all_keys()
