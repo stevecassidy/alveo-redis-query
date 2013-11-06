@@ -9,11 +9,13 @@ class HCSvLabTokenizer:
     def tokenize(self, text):
         tokens = defaultdict(list)
 
+        position = 1
         #http://docs.python.org/2.7/library/re.html
         for m in re.finditer(self._pattern, text):
             start = m.start()
             end = m.end()
-            tokens[text[start:end]].append((start,end))
+            tokens[text[start:end]].append(((start,end),position))
+            position += 1
 
         return tokens
 
