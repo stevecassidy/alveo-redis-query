@@ -2,8 +2,8 @@ import time
 import redis
 from index_value import IndexValue
 from hcsvlab_tokenizer import HCSvLabTokenizer
-##import cPickle as pickle
-import pickle
+import cPickle as pickle
+##import pickle
 import os
 import client
 
@@ -48,7 +48,10 @@ def add_to_index(text, filename):
     
     for key in tokens.keys():
         index_value = IndexValue(key, filename)
-        index_value.add_char_offset_value(tokens[key])
+        #unzip the character offsets and positions
+        char_offset, position = zip(*tokens[key])
+        index_value.add_char_offset_values(char_offset)
+        index_value.add_position(position)
 
         result = filename + ',' + pickle.dumps(index_value)
         r.rpush(key, result)    
@@ -58,7 +61,7 @@ if __name__ == '__main__':
 
     clear_all_keys()
     
-    file_list = get_files('.\\samples\\ace')
+    file_list = get_files('./samples/ace')
 
     start = time.time()
     
