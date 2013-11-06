@@ -18,7 +18,7 @@ def get_files(directory):
     #http://www.daniweb.com/software-development/python/threads/177972/how-to-list-the-subdirrectories-in-a-folder
     files = os.listdir(directory)
     for i in range(len(files)):
-        files[i] = directory + '\\' + files[i]
+        files[i] = os.path.join(directory,  files[i])
     return files
 
 def tokenise(text):
@@ -60,7 +60,7 @@ def add_to_index(filename, text, token_set):
 
 if __name__ == '__main__':
 
-    file_list = get_files('.\\samples\\ace\\')
+    file_list = get_files('./samples/ace')
     
     start = time.time()
     
