@@ -1,7 +1,7 @@
 import time
 import redis
-##import cPickle as pickle
-import pickle
+import cPickle as pickle
+##import pickle
 
 r = redis.StrictRedis(host='localhost', port=6379, db=0)
 
@@ -36,13 +36,68 @@ def and_query(terms):
     
     for result in results:
         intersection = []
-        for x in compare:
-            for y in result:
-                if x[0] == y[0]:
-                    intersection.append((x[0],(x[1],y[1])))
+        for result1 in compare:
+            for result2 in result:
+                if result1[0] == result2[0]:
+                    #make the output consistent with the other queries
+                    offsets = []
+                    offsets.extend(result1[1])
+                    offsets.extend(result2[1])
+                    
+                    intersection.append((result1[0], offsets))
         compare = intersection
 
     return intersection
+
+def proximity_query(term1, term2, minimal_proximity=1):
+
+    results = []
+
+    l = r.lrange(term1, 0, -1)
+    results1 = []
+    for element in l:
+        x = pickle.loads(element.split(',')[1])
+        results1.append((x.get_filename(), x.get_char_offset_values(),
+                         x.get_position()))
+    
+    l = r.lrange(term2, 0, -1)
+    results2 = []
+    for element in l:
+        x = pickle.loads(element.split(',')[1])
+        results2.append((x.get_filename(), x.get_char_offset_values(),
+                         x.get_position()))
+
+    for result1 in results1:
+        for result2 in results2:
+            if result1[0] == result2[0]:
+                
+                pos1 = result1[2]
+                pos2 = result2[2]
+                len1 = len(pos1)
+                len2 = len(pos2)
+                i1 = 0
+                i2 = 0
+                result = []
+
+                while i1 < len1 and i2 < len2:
+                    
+                    if abs(pos1[i1]-pos2[i2]) <= minimal_proximity:
+                        if result1[1][i1] not in result:
+                            result.append(result1[1][i1])
+                        if result2[1][i2] not in result:
+                            result.append(result2[1][i2])
+                    
+                    #increment the smaller index by 1
+                    if i1 < i2:
+                        i1 += 1
+                    else:
+                        i2 += 1
+
+                if result:
+                    results.append((result1[0], result))
+
+    return results
+
     
 if __name__ == '__main__':
     start = time.time()
