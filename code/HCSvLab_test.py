@@ -22,7 +22,7 @@ class HCSvLabIndexerTest(unittest.TestCase):
                           'sfn403vtjb', 'test']
         
 
-        filename = '.\\samples\\test\\sample12.txt'
+        filename = './samples/test/sample12.txt'
         #get the text file
         f = open(filename, 'r')
         text = f.read()
@@ -51,11 +51,11 @@ class HCSvLabIndexerTest(unittest.TestCase):
 class HCSvLabQueryTest(unittest.TestCase):
 
     def setUp(self):
-        filelist = ['.\\samples\\test\\sample1.txt',
-                    '.\\samples\\test\\sample2.txt',
-                    '.\\samples\\test\\sample3.txt',
-                    '.\\samples\\test\\sample8.txt',
-                    '.\\samples\\test\\sample9.txt']
+        filelist = ['./samples/test/sample1.txt',
+                    './samples/test/sample2.txt',
+                    './samples/test/sample3.txt',
+                    './samples/test/sample8.txt',
+                    './samples/test/sample9.txt']
         inverted_index.update_index(filelist)
 
 
@@ -65,7 +65,7 @@ class HCSvLabQueryTest(unittest.TestCase):
 
     def test_single_term_query(self):
         #Within these tests, also check that the start/end positions are correct
-        #Note: as files were created in windows, the newlines as '\r\n'
+        #Note: as test/sample* files were created in windows, the newlines is '\r\n'
         
         self.fail()
 
@@ -95,15 +95,11 @@ class HCSvLabQueryTest(unittest.TestCase):
         #2 valid terms
         terms = ['said', 'the']
         results = query_processor.and_query(terms)
-        expected_results = [('.\\samples\\test\\sample2.txt', ([(41, 45),
-                                                                (82, 86)],
-                                                               [(46, 49),
-                                                                (87, 90),
-                                                                (98, 101)])),
-                            ('.\\samples\\test\\sample3.txt', ([(15, 19),
-                                                                (70, 74)],
-                                                               [(20, 23),
-                                                                (75, 78)]))]
+        expected_results = [('./samples/test/sample2.txt', [(41, 45), (82, 86),
+                                                            (46, 49), (87, 90),
+                                                            (98, 101)]),
+                            ('./samples/test/sample3.txt', [(15, 19), (70, 74),
+                                                            (20, 23), (75, 78)])]
         self.assertEqual(results, expected_results, "Expected %s, got %s" %
                          (expected_results, results))
 
@@ -117,15 +113,54 @@ class HCSvLabQueryTest(unittest.TestCase):
         #3 valid terms
         terms = ['said', 'the', 'cat']
         results = query_processor.and_query(terms)
-        expected_results = [('.\\samples\\test\\sample2.txt', (([(50, 53),
-                                                                 (91, 94)],
-                                                                [(41, 45),
-                                                                 (82, 86)]),
-                                                               [(46, 49),
-                                                                (87, 90),
-                                                                (98, 101)]))]
+        expected_results = [('./samples/test/sample2.txt', [(50, 53), (91, 94),
+                                                            (41, 45), (82, 86),
+                                                            (46, 49), (87, 90),
+                                                            (98, 101)])]
         self.assertEqual(results, expected_results, "Expected %s, got %s" %
                          (expected_results, results))
+
+    def test_proximity_query(self):
+
+        term1 = "said"
+        term2 = "cat"
+        results = query_processor.proximity_query(term1, term2)
+        expected_results = []
+        self.assertEqual(results, expected_results, "Expected %s, got %s" %
+                         (expected_results, results))
+
+        term1 = "said"
+        term2 = "cat"
+        results = query_processor.proximity_query(term1, term2, 2)
+        expected_results = [('./samples/test/sample2.txt', [(41, 45), (50, 53),
+                                                            (82, 86), (91, 94)])]
+        self.assertEqual(results, expected_results, "Expected %s, got %s" %
+                         (expected_results, results))
+
+        term1 = "said"
+        term2 = "the"
+        results = query_processor.proximity_query(term1, term2)
+        expected_results = [('./samples/test/sample2.txt', [(41, 45), (46, 49),
+                                                            (82, 86), (87, 90)]),
+                            ('./samples/test/sample3.txt', [(15, 19), (20, 23),
+                                                            (70, 74), (75, 78)])]
+        self.assertEqual(results, expected_results, "Expected %s, got %s" %
+                         (expected_results, results))
+
+
+        #check that there is no duplicates if a term is in the proximity of
+        #multiple other term.
+        #e.g. "fear. Have no fear"
+        term1 = "fear"
+        term2 = "have"
+        results = query_processor.proximity_query(term1, term2, 2)
+        expected_results = [('./samples/test/sample2.txt', [(19, 23), (11, 15),
+                                                            (26, 30), (34, 38)])]
+        self.assertEqual(results, expected_results, "Expected %s, got %s" %
+                         (expected_results, results))
+        
+
+
 
 if __name__ == '__main__':
     unittest.TextTestRunner(verbosity=2).run(unittest.makeSuite(HCSvLabIndexerTest))
