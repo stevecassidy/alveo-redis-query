@@ -159,7 +159,39 @@ class HCSvLabQueryTest(unittest.TestCase):
         self.assertEqual(results, expected_results, "Expected %s, got %s" %
                          (expected_results, results))
         
+    def test__get_proximity_results(self):
 
+        result1 = ('a', [(1,2),(10,11)], [1,20])
+        result2 = ('a', [(2,3),(3,4),(4,5),(5,6),(6,7),(7,8),(8,9)],
+                    [2,4,6,8,10,12,16])
+        results = query_processor._get_proximity_results(result1, result2, 10)
+        expected_results = [(1,2),(2,3),(3,4),(4,5),(5,6),(6,7),(10,11),(7,8),
+                            (8,9)]
+        self.assertEqual(results, expected_results, "Expected %s, got %s" %
+                         (expected_results, results))
+
+        result2 = ('a', [(1,2),(10,11)], [1,20])
+        result1 = ('a', [(2,3),(3,4),(4,5),(5,6),(6,7),(7,8),(8,9)],
+                    [2,4,6,8,10,12,16])
+        results = query_processor._get_proximity_results(result1, result2, 10)
+        expected_results = [(2,3),(1,2),(3,4),(4,5),(5,6),(6,7),(10,11),(7,8),
+                            (8,9)]
+        self.assertEqual(results, expected_results, "Expected %s, got %s" %
+                         (expected_results, results))
+
+        result1 = ('./samples/test/sample2.txt', [(41, 45), (82, 86)], [9, 17])
+        result2 = ('./samples/test/sample2.txt', [(50, 53), (91, 94)], [11, 19])
+        results = query_processor._get_proximity_results(result1, result2, 2)
+        expected_results = [(41, 45), (50, 53), (82, 86), (91, 94)]
+        self.assertEqual(results, expected_results, "Expected %s, got %s" %
+                         (expected_results, results))
+
+        result2 = ('./samples/test/sample2.txt', [(41, 45), (82, 86)], [9, 17])
+        result1 = ('./samples/test/sample2.txt', [(50, 53), (91, 94)], [11, 19])
+        results = query_processor._get_proximity_results(result1, result2, 2)
+        expected_results = [(50, 53), (41, 45), (91, 94), (82, 86)]
+        self.assertEqual(results, expected_results, "Expected %s, got %s" %
+                         (expected_results, results))
 
 
 if __name__ == '__main__':
