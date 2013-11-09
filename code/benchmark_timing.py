@@ -32,16 +32,16 @@ def calculate_average_time_for_indexer_internal(indexer, filelist):
         indexer.update_index(filelist)
         end = (time.time() - start)
 
-        f.write(str(i+1) + " " + str(end) + "\n")
+##        f.write(str(i+1) + " " + str(end) + "\n")
         
         average += end
-        byte_average = r.info()['used_memory']
+        byte_average += r.info()['used_memory']
 
         #need to clear all of the keys, so that redis doesn't run out of memory during this test
         r.flushall()
 
-        if (i+1) % 10 == 0:
-            f.write(str((average / (i+1))) + " " + str(average) + "\n")
+##        if (i+1) % 10 == 0:
+##            f.write(str((average / (i+1))) + " " + str(average) + "\n")
 
     f.write("average redis memory used in bytes: " + str(byte_average / ITERATIONS) + "\n")
     
@@ -56,15 +56,15 @@ def calculate_average_time_for_indexer_external(indexer):
         indexer.update_index(use_external=True)
         end = (time.time() - start)
 
-        f.write(str(i+1) + " " + str(end) + "\n")
+##        f.write(str(i+1) + " " + str(end) + "\n")
 
         average += end
 
         #need to clear all of the keys, so that redis doesn't run out of memory during this test
         r.flushall()
 
-        if (i+1) % 10 == 0:
-            f.write(str((average / (i+1))) + " " + str(average) + "\n")
+##        if (i+1) % 10 == 0:
+##            f.write(str((average / (i+1))) + " " + str(average) + "\n")
         
     average /= ITERATIONS
     return average
@@ -77,12 +77,12 @@ def calculate_average_time_for_single_term_query(q, term):
         q.single_term_query(term)
         end = (time.time() - start)
 
-        f.write(str(i+1) + " " + str(end) + "\n")
+##        f.write(str(i+1) + " " + str(end) + "\n")
         
         average += end
 
-        if (i+1) % 10 == 0:
-            f.write(str((average / (i+1))) + " " + str(average) + "\n")
+##        if (i+1) % 10 == 0:
+##            f.write(str((average / (i+1))) + " " + str(average) + "\n")
 
     f.write("number of documents: "+ str(len(q.single_term_query(term))) + "\n")
     
@@ -137,14 +137,14 @@ def calculate_average_time_for_queries(q):
     terms = ['a', 'the', 'that', 'be', 'i', 'test', '70', '30']
     for term in terms:
         f.write("single term query: " + str(term) + "\n")
-        f.write(str(calculate_average_time_for_single_term_query(q, term)) + "\n")
+        f.write(str(calculate_average_time_for_single_term_query(q, term)) + "\n\n")
 
     terms_list = [['a', 'the'],['a', 'that'], ['a', 'the', 'that'],
                   ['to', 'a', 'that'], ['to', 'a', 'that', 'the'],
                   ['also', '70'], ['test', '30'], ['las', 'vegas']]
     for terms in terms_list:
         f.write("AND query: " + str(terms) + "\n")
-        f.write(str(calculate_average_time_for_and_query(q, terms)) + "\n")
+        f.write(str(calculate_average_time_for_and_query(q, terms)) + "\n\n")
 
     terms = [['a', 'the'],['a', 'to'], ['that', 'i'], ['to', 'also'],
              ['test', 'i']]
@@ -155,7 +155,7 @@ def calculate_average_time_for_queries(q):
                     str(proximity) + "\n")
             f.write(str(calculate_average_time_for_proximity_query(q, term[0],
                                                                term[1],
-                                                               proximity)) + "\n")
+                                                               proximity)) + "\n\n")
 
 
 if __name__ == '__main__':
@@ -166,36 +166,37 @@ if __name__ == '__main__':
     print "version 0.1"
     f.write("version 0.1" + "\n")
     f.write(str(calculate_average_time_for_indexer_internal(ver0_1_indexer,
-                                                        filelist)) + "\n")
+                                                        filelist)) + "\n\n")
 
     print "version 0.2"
     f.write("version 0.2" + "\n")
     f.write(str(calculate_average_time_for_indexer_internal(ver0_2_indexer,
-                                                        filelist)) + "\n")
+                                                        filelist)) + "\n\n")
 
     print "version 0.3"
     f.write("version 0.3" + "\n")
     f.write(str(calculate_average_time_for_indexer_internal(ver0_3_indexer,
-                                                        filelist)) + "\n")
+                                                        filelist)) + "\n\n")
 
     print "version 0.4"
     f.write("version 0.4" + "\n")
     f.write(str(calculate_average_time_for_indexer_internal(ver0_4_indexer,
-                                                        filelist)) + "\n")
+                                                        filelist)) + "\n\n")
 
     print "version 0.5 - includes positional information"
     f.write("version 0.5 - includes positional information" + "\n")
     f.write(str(calculate_average_time_for_indexer_internal(ver0_5_indexer,
-                                                        filelist)) + "\n")
+                                                        filelist)) + "\n\n")
 
     print "current version (version 0.6)"
     f.write("current version (version 0.6)" + "\n")
     f.write(str(calculate_average_time_for_indexer_internal(current_indexer,
-                                                        filelist)) + "\n")
+                                                        filelist)) + "\n\n")
 
     print "current version (version 0.6) - external files"
     f.write("current version (version 0.6) - external files" + "\n")
-    f.write(str(calculate_average_time_for_indexer_external(current_indexer)) + "\n")
+    f.write(str(calculate_average_time_for_indexer_external(current_indexer))
+            + "\n\n")
 
     current_indexer.update_index(filelist)
 
