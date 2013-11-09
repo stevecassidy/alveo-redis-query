@@ -71,32 +71,34 @@ def proximity_query(term1, term2, minimal_proximity=1):
         for result2 in results2:
             if result1[0] == result2[0]:
                 
-                pos1 = result1[2]
-                pos2 = result2[2]
-                len1 = len(pos1)
-                len2 = len(pos2)
-                i1 = 0
-                i2 = 0
-                result = []
-
-                while i1 < len1 and i2 < len2:
-                    
-                    if abs(pos1[i1]-pos2[i2]) <= minimal_proximity:
-                        if result1[1][i1] not in result:
-                            result.append(result1[1][i1])
-                        if result2[1][i2] not in result:
-                            result.append(result2[1][i2])
-                    
-                    #increment the smaller index by 1
-                    if i1 < i2:
-                        i1 += 1
-                    else:
-                        i2 += 1
+                result = _get_proximity_results(result1, result2, minimal_proximity)
 
                 if result:
                     results.append((result1[0], result))
 
     return results
+
+def _get_proximity_results(result1, result2, minimal_proximity):
+
+    print result1
+    
+    pos1 = result1[2]
+    pos2 = result2[2]
+    len1 = len(pos1)
+    len2 = len(pos2)
+    i1 = 0
+    i2 = 0
+    result = []
+
+    for i1 in range(len1):
+        for i2 in range(len2):
+            if abs(pos1[i1]-pos2[i2]) <= minimal_proximity:
+                if result1[1][i1] not in result:
+                    result.append(result1[1][i1])
+                if result2[1][i2] not in result:
+                    result.append(result2[1][i2])
+    
+    return result
 
     
 if __name__ == '__main__':
