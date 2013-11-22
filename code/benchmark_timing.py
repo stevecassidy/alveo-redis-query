@@ -84,7 +84,11 @@ def calculate_average_time_for_single_term_query(q, term):
 ##        if (i+1) % 10 == 0:
 ##            f.write(str((average / (i+1))) + " " + str(average) + "\n")
 
-    f.write("number of documents: "+ str(len(q.single_term_query(term))) + "\n")
+##    f.write("number of documents: "+ str(len(q.single_term_query(term))) + "\n")
+##    hits = 0
+##    for result in q.single_term_query(term):
+##        hits += len(result[1])
+##    f.write("number of hits: "+ str(hits) + "\n")
     
     average /= ITERATIONS
     return average
@@ -98,14 +102,18 @@ def calculate_average_time_for_and_query(q, terms):
         q.and_query(terms)
         end = (time.time() - start)
 
-        f.write(str(i+1) + " " + str(end) + "\n")
+##        f.write(str(i+1) + " " + str(end) + "\n")
         
         average += end
 
-        if (i+1) % 10 == 0:
-            f.write(str((average / (i+1))) + " " + str(average) + "\n")
+##        if (i+1) % 10 == 0:
+##            f.write(str((average / (i+1))) + " " + str(average) + "\n")
 
-    f.write("number of documents: "+ str(len(q.and_query(terms))) + "\n")
+##    f.write("number of documents: "+ str(len(q.and_query(terms))) + "\n")
+##    hits = 0
+##    for result in q.and_query(terms):
+##        hits += len(result[1])
+##    f.write("number of hits: "+ str(hits) + "\n")
     
     average /= ITERATIONS
     return average
@@ -119,15 +127,15 @@ def calculate_average_time_for_proximity_query(q, term1, term2, minimal_proximit
         q.proximity_query(term1, term2, minimal_proximity)
         end = (time.time() - start)
 
-        f.write(str(i+1) + " " + str(end) + "\n")
+##        f.write(str(i+1) + " " + str(end) + "\n")
         
         average += end
 
-        if (i+1) % 10 == 0:
-            f.write(str((average / (i+1))) + " " + str(average) + "\n")
+##        if (i+1) % 10 == 0:
+##            f.write(str((average / (i+1))) + " " + str(average) + "\n")
 
-    f.write("number of documents: "+ str(len(
-        q.proximity_query(term1, term2, minimal_proximity))) + "\n")
+##    f.write("number of documents: "+ str(len(
+##        q.proximity_query(term1, term2, minimal_proximity))) + "\n")
     
     average /= ITERATIONS
     return average
@@ -198,6 +206,7 @@ if __name__ == '__main__':
     f.write(str(calculate_average_time_for_indexer_external(current_indexer))
             + "\n\n")
 
+    f.write("current version" + "\n")
     current_indexer.update_index(filelist)
 
     print "version 0.5 query processor"
