@@ -4,20 +4,20 @@ class IndexValue:
     def __init__(self, token, filename):
         self._token = token
         self._filename = filename
-        self._char_offset_values = []
-        self._position = []
+        self._char_offsets = []
+        self._positions = []
 
-    def add_char_offset_values(self, char_offset_value):
-        self._char_offset_values.extend(char_offset_value)
+    def add_char_offsets(self, char_offsets):
+        self._char_offsets.extend(char_offsets)
 
-    def get_char_offset_values(self):
-        return self._char_offset_values
+    def get_char_offsets(self):
+        return self._char_offsets
 
-    def add_position(self, position):
-        self._position.extend(position)
+    def add_positions(self, positions):
+        self._positions.extend(positions)
 
-    def get_position(self):
-        return self._position
+    def get_positions(self):
+        return self._positions
 
     def get_filename(self):
         return self._filename

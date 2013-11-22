@@ -11,7 +11,7 @@ def single_term_query(term):
     results = []
     for element in l:
         x = pickle.loads(element.split(',')[1])
-        results.append((x.get_filename(), x.get_char_offset_values()))
+        results.append((x.get_filename(), x.get_char_offsets()))
     return results
 
 def and_query(terms):
@@ -57,15 +57,15 @@ def proximity_query(term1, term2, minimal_proximity=1):
     results1 = []
     for element in l:
         x = pickle.loads(element.split(',')[1])
-        results1.append((x.get_filename(), x.get_char_offset_values(),
-                         x.get_position()))
+        results1.append((x.get_filename(), x.get_char_offsets(),
+                         x.get_positions()))
     
     l = r.lrange(term2, 0, -1)
     results2 = []
     for element in l:
         x = pickle.loads(element.split(',')[1])
-        results2.append((x.get_filename(), x.get_char_offset_values(),
-                         x.get_position()))
+        results2.append((x.get_filename(), x.get_char_offsets(),
+                         x.get_positions()))
 
     for result1 in results1:
         for result2 in results2:
@@ -79,8 +79,6 @@ def proximity_query(term1, term2, minimal_proximity=1):
     return results
 
 def _get_proximity_results(result1, result2, minimal_proximity):
-
-    print result1
     
     pos1 = result1[2]
     pos2 = result2[2]

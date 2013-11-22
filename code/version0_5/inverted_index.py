@@ -49,9 +49,9 @@ def add_to_index(text, filename):
     for key in tokens.keys():
         index_value = IndexValue(key, filename)
         #unzip the character offsets and positions
-        char_offset, position = zip(*tokens[key])
-        index_value.add_char_offset_values(char_offset)
-        index_value.add_position(position)
+        char_offsets, positions = zip(*tokens[key])
+        index_value.add_char_offsets(char_offsets)
+        index_value.add_positions(positions)
 
         result = filename + ',' + pickle.dumps(index_value)
         r.rpush(key, result)    
