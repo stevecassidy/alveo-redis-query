@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Alveo Client Presentation</title>
+    <link rel="stylesheet" type="text/css" href="/static/main.css" />
+    <script src="/static/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript">
+	update_url = "/update";
+	caller = null
+	$('document').ready(function() {
+	    $('.list').click(function () {
+	        caller = $(this)
+	    	$.ajax({
+                type: 'GET',
+	            url: update_url,
+	            data: {list : $(this).text()},
+	            dataType: 'json',
+	            success: update_list
+		    });
+	    });
+	});
+	/* callback function for the ajax call, 
+	 */
+	function update_list(data) {
+		var success = true;
+		var message = ''
+        $.each(data, function(key, val) {
+            if (key == '1'){
+            	success = val;}
+            else{
+            	message = val;};
+        });
+        if (success) {
+            caller.do_somthing();
+        }
+	}
+
+    </script>
+  </head>
+
+  <body>
+    <div class="main">
+    	<img alt="" src="/static/hcsvlab.png">
+    	<label id="title">Alveo</label>
+    	<form action="/search" method="get" id="searchForm">
+    		<div>
+	    		
+		    	<input type="search" name="query" placeholder="Enter your search terms" autofocus required/>
+			    <input type="submit" value="Search" formtarget="results" />
+    		</div>
+    	</form>
+    </div>
+    #lists
+    <div id="resultFrame">
+	    <iframe name="results">
+	    	
+	    </iframe> 
+    </div>     
+  </body>
+</html>
