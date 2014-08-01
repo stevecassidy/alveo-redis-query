@@ -1,1 +1,1 @@
-from alveo_redis_query import Crawler, ClientFactory, Tokeniser, Indexer, IndexValue, QueryProcessor
+from alveo_redis_query import _client, Crawler, QueryProcessor, _redis_cli

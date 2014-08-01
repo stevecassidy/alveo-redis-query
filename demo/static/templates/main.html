@@ -2,14 +2,16 @@
 <html>
   <head>
     <title>Alveo Client Presentation</title>
-    <link rel="stylesheet" type="text/css" href="/static/main.css" />
-    <script src="/static/jquery-1.9.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/itemlists.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/doc_view.css" />
+    <script src="/static/javascript/jquery-1.9.1.min.js"></script>
     <script type="text/javascript">
 	update_url = "/update";
 	caller = null
 	$('document').ready(function() {
 	    $('.list').click(function () {
-	        caller = $(this)
+	        var caller = $(this)
 	    	$.ajax({
                 type: 'GET',
 	            url: update_url,
@@ -40,20 +42,20 @@
 
   <body>
     <div class="main">
-    	<img alt="" src="/static/hcsvlab.png">
+    	<img alt="" src="/static/images/hcsvlab.png">
     	<label id="title">Alveo</label>
     	<form action="/search" method="get" id="searchForm">
     		<div>
-	    		
 		    	<input type="search" name="query" placeholder="Enter your search terms" autofocus required/>
 			    <input type="submit" value="Search" formtarget="results" />
     		</div>
     	</form>
+    	#lists
     </div>
-    #lists
+    
     <div id="resultFrame">
 	    <iframe name="results">
-	    	
+	    	#docs
 	    </iframe> 
     </div>     
   </body>

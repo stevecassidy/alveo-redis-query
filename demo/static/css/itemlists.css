@@ -1,0 +1,31 @@
+#itemlists{
+	position:absolute;
+	top:18px;
+	left:450px;
+	z-index:1;
+	width:auto;
+	padding:0px;
+	height:30px;
+}
+
+#itemlists ul{
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+	text-align: center;
+}
+
+#itemlists ul li{
+	display: inline; 
+}
+
+#itemlists ul li a{
+	text-decoration: none;
+	padding: .2em 1em;
+	color: #fff;
+}
+
+#itemlists ul li a:hover{
+	color: #fff;
+	background-color: rgba(255,181,34,0.9);
+}

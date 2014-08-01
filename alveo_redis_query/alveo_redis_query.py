@@ -1,86 +1,35 @@
 import pyalveo
 import re
-import json
 from collections import defaultdict
 import redis
 import cPickle as pickle
 
 _redis_cli = redis.StrictRedis(host='localhost', port=6379, db=0)
-    
+_client = pyalveo.Client()
+
 class ClientFactory():
-    
-    _client = None
     
     @classmethod
     def create_client(cls, api_key, api_url, use_cache=True, update_cache=True):
-        cls._client = pyalveo.Client(api_key, api_url, 
-                         use_cache=True, update_cache=True)
-    @classmethod    
-    def get_client(cls):
-        if cls._client is None:
-            cls._client = pyalveo.Client()
-        return cls._client
+        _client = pyalveo.Client(api_key, api_url, use_cache, update_cache)
         
-class Tokeniser():
-    
-    _pattern = r"\d(\d*\.\d+)*\w*|\w+([\'\-]?\w+)?"
-    
-    @classmethod
-    def get_pattern(cls):
-        return cls._pattern
-    
-    @classmethod
-    def set_pattern(cls, value):
-        cls._pattern = value
-    
-    @classmethod
-    def tokenise(cls, item):
-        text = item.get_primary_text()
-        if text is not None:
-            filename = item.url()
-            tokens = defaultdict(list)
-            position = 1
-            for m in re.finditer(cls._pattern, text):
-                start = m.start()
-                end = m.end()
-                tokens[text[start:end]].append(((start,end),position))
-                position += 1
-            Indexer.index(filename, tokens)
-    
 class Crawler():
     
     @classmethod
     def crawl(cls, given_item_list):
+        item_list_name = given_item_list.name()
         if given_item_list:
             client = given_item_list.client
             for item_url in given_item_list.item_urls:
                 try:
                     item = client.get_item(item_url)
-                    Tokeniser.tokenise(item)
+                    Tokeniser.tokenise(item_list_name, item)
                 except pyalveo.APIError as error:
                     return error.msg
                 
         else:
-            client = pyalveo.client()
-            all_servers = cls._combine(client.get_item_lists())
-            for server in all_servers:
-                item_list_url = server['item_list_url']
-                item_list = client.get_item_list(item_list_url)
-                for item_url in item_list.item_urls:
-                    try:
-                        item = client.get_item(item_url)
-                        Tokeniser.tokenise(item)
-                    except pyalveo.APIError as error:
-                        return error.msg
-    
-    @classmethod
-    def _combine(cls, ownerships):
-        result = []
-        for ownership in ownerships:
-            for server in ownerships[ownership]:
-                result.append(server)
-        return result
-
+            """raise an error"""
+            
 class Indexer():
     
     @classmethod
@@ -101,27 +50,53 @@ class IndexValue():
         self._char_offsets = []
         self._positions = []
     
-    @property
-    def char_offsets(self):
-        return self._char_offsets
-    
     def add_char_offsets(self, value):
         self._char_offsets.extend(value)
     
-    @property
-    def positions(self):
-        return self._positions
-    
     def add_positions(self, value):
         self._positions.extend(value)
+    
+    @property
+    def char_offsets(self):
+        return self._char_offsets
     
     @property
     def filename(self):
         return self._filename
     
     @property
+    def positions(self):
+        return self._positions
+    
+    @property
     def term(self):
         return self._term
+    
+class Tokeniser():
+    
+    _pattern = r"\d(\d*\.\d+)*\w*|\w+([\'\-]?\w+)?"
+    
+    @classmethod
+    def get_pattern(cls):
+        return cls._pattern
+    
+    @classmethod
+    def set_pattern(cls, value):
+        cls._pattern = value
+    
+    @classmethod
+    def tokenise(cls, item_list_name, item):
+        text = item.get_primary_text()
+        if text is not None:
+            filename = item.url()
+            tokens = defaultdict(list)
+            position = 1
+            for m in re.finditer(cls._pattern, text):
+                start = m.start()
+                end = m.end()
+                tokens[text[start:end]].append(((start,end),position))
+                position += 1
+            Indexer.index(filename, tokens)
     
 class QueryProcessor():
     
@@ -142,11 +117,12 @@ class QueryProcessor():
         results = []
         for element in query_result:
             index_value = pickle.loads(element.split(',')[1])
+            text = _client.get_item(index_value.filename).get_primary_text()
             if include_positions:
-                results.append((index_value.filename, index_value.char_offsets,
+                results.append((index_value.filename, text, index_value.char_offsets,
                          index_value.positions))
             else:
-                results.append((index_value.filename, index_value.char_offsets))
+                results.append((index_value.filename, text, index_value.char_offsets))
         return results
     
     @classmethod
@@ -167,18 +143,12 @@ class QueryProcessor():
                     for doc_offsets2 in index:
                         if doc_offsets1[0] == doc_offsets2[0]:
                             offsets = []
-                            offsets.extend(doc_offsets1[1])
-                            offsets.extend(doc_offsets2[1])
+                            offsets.extend(doc_offsets1[2])
+                            offsets.extend(doc_offsets2[2])
                             
-                            intersection.append((doc_offsets1[0], offsets))
+                            intersection.append((doc_offsets1[0], doc_offsets1[1], offsets))
                 compare = intersection
         else:
-            """for term in terms:
-                indices.append(process_point = 0, cls.single_term_query(term))
-            indices.sort(key=len)
-                
-            for index in indices:
-                pass"""
             pass
     
         return intersection
@@ -196,14 +166,14 @@ class QueryProcessor():
                     result = cls._get_proximity_offsets(result1, result2, minimal_proximity)
     
                     if result:
-                        results.append((result1[0], result))
+                        results.append((result1[0], result1[1], result))
     
         return results
     
     @classmethod
     def _get_proximity_offsets(cls, index1, index2, minimal_proximity=1, order=False):
-        posisions1 = index1[2]
-        posisions2 = index2[2]
+        posisions1 = index1[3]
+        posisions2 = index2[3]
         len1 = len(posisions1)
         len2 = len(posisions2)
         results = []
@@ -217,9 +187,9 @@ class QueryProcessor():
                 else:
                     dist = abs(posisions1[i1]-posisions2[i2])
                 if dist <= minimal_proximity:
-                    if index1[1][i1] not in results:
-                        results.append(index1[1][i1])
-                    if index2[1][i2] not in results:
-                        results.append(index2[1][i2])
+                    if index1[2][i1] not in results:
+                        results.append(index1[2][i1])
+                    if index2[2][i2] not in results:
+                        results.append(index2[2][i2])
         
         return results
