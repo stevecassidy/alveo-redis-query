@@ -6,11 +6,24 @@ import cPickle as pickle
 
 class Test(unittest.TestCase):
 
+    documents = ['test/samples/sample1.txt',
+                'test/samples/sample2.txt',
+                'test/samples/sample3.txt',
+                'test/samples/sample4.txt',
+                'test/samples/sample5.txt',
+                'test/samples/sample6.txt',
+                'test/samples/sample7.txt',
+                'test/samples/sample8.txt',
+                'test/samples/sample9.txt',
+                'test/samples/sample10.txt',
+                'test/samples/sample11.txt',
+                'test/samples/sample12.txt',
+                ]
 
     def test_tokenise(self):
         index = alveo.Index()
         
-        filename = './samples/sample12.txt'
+        filename = 'test/samples/sample12.txt'
         with open(filename, 'r') as f:
             text = f.read()
             
@@ -42,77 +55,91 @@ class Test(unittest.TestCase):
             self.assertEqual(position, correct_positions[i], "Expected %s, got %s" %
                          (correct_positions[i], position))
 
-    def test_create_index(self):
-        filename = './samples/sample10.txt'
-        with open(filename, 'r') as f:
-            text = f.read().lower()
+    def test_index_documents(self):
+
         index = alveo.Index()
-        tokens = index._tokenise(text)
-        index._create_index_values("test", "samples", filename, tokens)
+        index.clear()
+
+        for filename in self.documents:
+            index.index_document(filename)
 
         #test that term 'information' was correctly added to the index
-        redis_cli = redis.StrictRedis(host='localhost', port=6379, db="test")
+        redis_cli = index.redis
         
-        term = 'information'
-        l = redis_cli.lrange(term, 0, -1)
+        term = 'this'
         
-        expected_results = ["(ialveo_redis_query.alveo_redis_query\nIndexValue\np1\n(dp2\nS'_token'\np3\nS'information'\np4\nsS'_positions'\np5\n(lp6\nI1\naI8\naI13\naI19\naI35\naI46\nasS'_item_url'\np7\nS'./samples/sample10.txt'\np8\nsS'_char_offsets'\np9\n(lp10\n(I0\nI11\ntp11\na(I51\nI62\ntp12\na(I88\nI99\ntp13\na(I126\nI137\ntp14\na(I245\nI256\ntp15\na(I316\nI327\ntp16\nasb."]
-        self.assertEqual(l, expected_results, "Expected %s, got %s" %
-                         (expected_results, l))
-
-        index_value = pickle.loads(expected_results[0])
-
-
-        expected_results = [(0, 11), (51, 62), (88, 99), (126, 137), (245, 256), (316, 327)]
-        self.assertEqual(index_value.char_offsets, expected_results,
-                         "Expected %s, got %s" % (expected_results,
-                                                  index_value.char_offsets))
-
-        expected_results = [1, 8, 13, 19, 35, 46]
-        self.assertEqual(index_value.positions, expected_results,
-                         "Expected %s, got %s" % (expected_results,
-                                                  index_value.positions))
-
-        #test that term 'of' was correctly added to the index
-        term = 'of'
-        l = redis_cli.lrange(term, 0, -1)
+        hits = index.get_entry(term)
         
-        expected_results = ["(ialveo_redis_query.alveo_redis_query\nIndexValue\np1\n(dp2\nS'_token'\np3\nS'of'\np4\nsS'_positions'\np5\n(lp6\nI6\naI18\nasS'_item_url'\np7\nS'./samples/sample10.txt'\np8\nsS'_char_offsets'\np9\n(lp10\n(I38\nI40\ntp11\na(I123\nI125\ntp12\nasb."]
-        self.assertEqual(l, expected_results, "Expected %s, got %s" %
-                         (expected_results, l))
-
-        index_value = pickle.loads(expected_results[0])
-
-
-        expected_results = [(38, 40), (123, 125)]
-        self.assertEqual(index_value.char_offsets, expected_results,
-                         "Expected %s, got %s" % (expected_results,
-                                                  index_value.char_offsets))
-
-        expected_results = [6, 18]
-        self.assertEqual(index_value.positions, expected_results,
-                         "Expected %s, got %s" % (expected_results,
-                                                  index_value.positions))
+        self.assertEqual(3, len(hits), "Expected three documents to match query for 'this'")
+        
+        hitdocs = [hit.docid for hit in hits]
+        self.assertIn('test/samples/sample3.txt', hitdocs)
+        self.assertIn('test/samples/sample6.txt', hitdocs)
+        self.assertIn('test/samples/sample11.txt', hitdocs)
+        
+        for hit in hits:
+            if hit.docid == 'test/samples/sample3.txt':
+                self.assertEqual(hit.char_offsets, [(31, 35)])
+                self.assertEqual(hit.positions, [7])        
+    
 
         #test terms not present in sample10.txt are not added to the index
-        term = ''
-        l = redis_cli.lrange(term, 0, -1)
-        expected_results = []
-        self.assertEqual(l, expected_results, "Expected %s, got %s" %
-                         (expected_results, l))
+        hits = index.get_entry('')
+        self.assertEqual([], hits, "Expected no results for empty search term")
 
-        term = 'pumpkin'
-        l = redis_cli.lrange(term, 0, -1)
-        expected_results = []
-        self.assertEqual(l, expected_results, "Expected %s, got %s" %
-                         (expected_results, l))
+        hits = index.get_entry('pumpkin')
+        self.assertEqual([], hits, "Expected no results for non-occuring term 'pumpkin'")
+        index.clear()
+        
+    
+    def test_index_string(self):
+        """Test that we can index from a string"""
+        
+        
+        index = alveo.Index()
+        index.clear()
+        
+        text1 = "now is the winter of our discontent made glorious summer by this son of york"
+        text2 = "now one two three"
+        
+        index.index_string("text1", text1)
+        index.index_string("text2", text2)
+        
+        hits = index.get_entry('now')
+        self.assertEqual(2, len(hits))
+        
+        hits = index.get_entry('two')
+        self.assertEqual(1, len(hits))
+        
+        
+    
+    def test_clear_index(self):
+        """Test that the clear method removes stuff from the index"""
+                
+        index = alveo.Index()
 
-        term = 'taxi'
-        l = redis_cli.lrange(term, 0, -1)
-        expected_results = []
-        self.assertEqual(l, expected_results, "Expected %s, got %s" %
-                         (expected_results, l))
-        redis_cli.flushall()
+        for filename in self.documents:
+            index.index_document(filename)
+    
+        hits = index.get_entry('the')
+
+        self.assertGreater(len(hits), 0, "Expected some hits on 'the'")
+        
+        index.clear()
+        
+        newhits = index.get_entry('the')
+        
+        self.assertEqual(0, len(newhits), "Expected zero hits from cleared index")
+        
+    
+    
+    def test_alveo_index(self):
+        import pyalveo 
+        # fails due to invalid API key
+        self.assertRaises(pyalveo.APIError, alveo.AlveoIndex, ("invalid key"))
+        
+        
+
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

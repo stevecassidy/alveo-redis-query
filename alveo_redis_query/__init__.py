@@ -1,1 +1,1 @@
-from alveo_redis_query import Index
+from alveo_redis_query import Index, AlveoIndex

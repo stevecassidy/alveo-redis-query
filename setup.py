@@ -5,13 +5,13 @@ from codecs import open
 here = path.abspath(path.dirname(__file__))
 
 with open(path.join(here, 'readme.md'), encoding='utf-8') as f:
-	long_descripotion = f.read()
+	long_description = f.read()
 
 setup(
 	name='alveo_redis_query',
 	version='0.1',
 	description="A Python search engine to work on data from HCSvLab/Alveo collections",
-	long_descripotion=long_descripotion,
+	long_description=long_description,
 
 	url='https://github.com/stevecassidy/alveo-redis-query/',
 
@@ -25,6 +25,8 @@ setup(
 	
     install_requires=[
         "pyalveo",
-        "redis-py",
+        "redis",
     ],
+    
+    test_suite='test.index_tests',
 	)
