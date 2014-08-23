@@ -1,1 +1,0 @@
-This is a simple full-text search engine based on Redis designed for use with the Alveo Virtual Laboratory.
