@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Alveo Client Presentation</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css" />
+  </head>
+
+  <body>
+    <div class="main">
+    	<img alt="" src="/static/images/hcsvlab.png">
+    	<label id="title">Alveo</label>
+    	<form action="/search" method="get" id="searchForm">
+    		<div>
+		    	<input type="search" name="query" placeholder="Enter your search terms" autofocus required/>
+			    <input type="submit" value="Search" formtarget="results" />
+    		</div>
+    	</form>
+    </div>
+    <div id="resultFrame">
+	    <iframe name="results">
+	    	#docs
+	    </iframe> 
+    </div>     
+  </body>
+</html>
